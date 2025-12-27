@@ -43,18 +43,20 @@ const removeConfirmationId = (id: string) => {
     notifyListeners();
 }
 
+export type ConfirmationProviderProps = Pick<ConfirmationDialogWrapperProps, 'Component'>;
+
+let confirmationProviderInstancesNumber = 0;
 
 export const promptConfirmation = (props?: ConfirmationProps) => {
+    if (confirmationProviderInstancesNumber === 0) {
+        throw new Error("No ConfirmationProvider component found on the page. You can't use promptConfirmation if your app doesn't have ConfirmationProvider component. Please add one to your page, check https://github.com/HichemTab-tech/react-confirmation-box#-60-second-tldr for more information.");
+    }
     const uniqueId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     register(uniqueId, props);
     return new Promise<boolean>((resolve) => {
         confirmationRegistry.get(uniqueId)!.resolve = resolve;
     });
 }
-
-export type ConfirmationProviderProps = Pick<ConfirmationDialogWrapperProps, 'Component'>;
-
-let confirmationProviderInstancesNumber = 0;
 
 const ConfirmationProvider = ({Component}: ConfirmationProviderProps) => {
     const ids = useSyncExternalStore(subscribe, getConfirmationsFromRegistry, getConfirmationsFromRegistry);
