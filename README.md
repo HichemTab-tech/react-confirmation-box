@@ -1,8 +1,14 @@
 # React Confirmation Box
 
-*A short but clear description of your package. Explain what it does, why it’s useful, and in what context it should be used.*
+**React Confirmation Box** is a lightweight utility that lets you show a confirmation dialog **and await the user’s decision** before continuing.
 
----
+Instead of managing dialog state, callbacks, or context everywhere, you simply call an async function:
+
+```ts
+const confirmed = await promptConfirmation();
+```
+
+Perfect for destructive actions, critical flows, or anywhere you’d normally stop and ask *“Are you sure?”*.
 
 ## 🚀 Getting Started
 
@@ -18,93 +24,174 @@ or, if using pnpm:
 pnpm add react-confirmation-box
 ```
 
----
-
 ## ☕ 60-Second TL;DR
 
-Show a minimal but practical example that someone can copy-paste to immediately see results:
+Mount the provider once (usually at the root of your app):
 
-```javascript
-import { exampleFunction } from 'react-confirmation-box';
+```tsx
+import { ConfirmationProvider } from "react-confirmation-box";
 
-export default function Demo() {
-  const result = exampleFunction('Hello');
-  return <div>{result}</div>;
-}
-```
-
-## Usage
-
-Provide a more detailed usage example:
-
-```javascript
-import { exampleFunction } from 'react-confirmation-box';
-
-function Example() {
-  // Default behavior
-  const output = exampleFunction({ name: 'Alice' });
-
-  // With a custom identifier
-  const custom = exampleFunction(42, 'myKey');
-
+export function App() {
   return (
-    <div>
-      <p>{output}</p>
-      <p>{custom}</p>
-    </div>
+    <>
+      {/* your app */}
+      <ConfirmationProvider />
+    </>
   );
 }
 ```
+
+Use it anywhere:
+
+```tsx
+import { promptConfirmation } from "react-confirmation-box";
+
+async function deleteItem() {
+  const confirmed = await promptConfirmation();
+
+  if (!confirmed) return;
+
+  console.log("Item deleted");
+}
+```
+
+That’s it.
+
+## Usage
+
+### Basic confirmation
+
+```ts
+const confirmed = await promptConfirmation();
+
+if (confirmed) {
+  // proceed
+}
+```
+
+### With custom text and behavior
+
+```ts
+await promptConfirmation({
+  title: "Delete item",
+  description: "This action cannot be undone.",
+  confirmText: "Delete",
+  cancelText: "Cancel",
+  variant: "warning",
+});
+```
+
+### Using `.then()` instead of `await`
+
+```ts
+promptConfirmation().then((confirmed) => {
+  if (confirmed) {
+    console.log("Confirmed");
+  }
+});
+```
+
+### Nested confirmations
+
+Confirmations can be chained or nested naturally:
+
+```ts
+await promptConfirmation({
+  onConfirm: () =>
+    promptConfirmation().then((confirmed) => {
+      if (confirmed) {
+        console.log("Second confirmation accepted");
+      }
+    }),
+});
+```
+
+## Custom Dialog Component
+
+By default, the package ships with a simple dialog implementation.
+
+You can provide **your own confirmation UI** by passing a custom component to the provider:
+
+```tsx
+<ConfirmationProvider Component={MyCustomDialog} />
+```
+
+Your component will receive all required props (`open`, `onConfirm`, `onCancel`, etc.) and full control over rendering.
 
 ---
 
 ## API Reference
 
-### Function `exampleFunction(args)`
+### `promptConfirmation(options?)`
 
-Description of what this function/method does and how to use it.
+Triggers a confirmation dialog and returns a promise that resolves with the user’s choice.
 
-**Parameters:**
+**Parameters**
 
-| Parameter   | Type   | Description                        |
-|-------------|--------|------------------------------------|
-| `args`      | any    | Description of the arguments.      |
+| Name      | Type                | Description                   |
+|-----------|---------------------|-------------------------------|
+| `options` | `ConfirmationProps` | Optional dialog configuration |
 
-**Returns:**
+**Returns**
 
-- Type: `any`
-Briefly describe the returned value or output.
+* `Promise<boolean>`
 
-**Example:**
+  * `true` → user confirmed
+  * `false` → user cancelled
 
-```javascript
-import { exampleFunction } from 'react-confirmation-box';
+**Example**
 
-const result = exampleFunction('Hello, world!');
-console.log(result);
+```ts
+const confirmed = await promptConfirmation();
+
+if (confirmed) {
+  doSomething();
+}
 ```
 
 ---
 
-## 🤝 Contributions
+### `<ConfirmationProvider />`
 
-Contributions are welcome! Feel free to:
+Responsible for rendering confirmation dialogs.
 
-1. Fork the repository
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+⚠️ **Must be mounted once** in your application.
 
-Please follow existing coding styles and clearly state your changes in the pull request.
+**Props**
 
-## ❓ FAQ
+| Name        | Type                                             | Description                          |
+|-------------|--------------------------------------------------|--------------------------------------|
+| `Component` | `React.FC<ConfirmationDialogProps>` *(optional)* | Custom confirmation dialog component |
 
-**Question 1**
-Answer.
+**ConfirmationDialogProps**
+```typescript
+type ConfirmationDialogProps = {
+  open: boolean,
+  onOpenChange: (open: boolean) => void,
+  warning: boolean,
+  title: string,
+  description: string,
+  onCancel: () => void,
+  cancelText: string,
+  onConfirm: () => void,
+  confirmText: string
+}
+```
 
-**Question 2**
-Answer.
+---
+
+## FAQ
+
+**Why not a hook?**
+Because confirmations are often triggered from services, handlers, or business logic — not just components.
+
+**Can multiple confirmations be shown at once?**
+Yes. Confirmations are stacked by default.
+
+**Is this safe with React Strict Mode?**
+Yes. The internal store is compatible with modern React patterns.
+
+---
 
 ## Issues
 
