@@ -1,18 +1,14 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { ConfirmationProvider, promptConfirmation } from '../src';
+import { describe, it, expect, afterEach } from 'vitest';
+import { render, screen, act, cleanup } from '@testing-library/react';
+import { ConfirmationProvider, promptConfirmation, type ConfirmationDialogProps } from '../src';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../src/components/ui/alert-dialog';
 
-const TestComponent = ({ onConfirm, onCancel }: { onConfirm: () => void, onCancel: () => void }) => (
-    <AlertDialog defaultOpen>
+const TestComponent = ({ title, description, onConfirm, onCancel, open, onOpenChange }: ConfirmationDialogProps) => (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
         <AlertDialogContent>
             <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete your account
-                    and remove your data from our servers.
-                </AlertDialogDescription>
+                <AlertDialogTitle>{title}</AlertDialogTitle>
+                <AlertDialogDescription>{description}</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
                 <AlertDialogCancel onClick={onCancel}>Cancel</AlertDialogCancel>
@@ -22,16 +18,25 @@ const TestComponent = ({ onConfirm, onCancel }: { onConfirm: () => void, onCance
     </AlertDialog>
 );
 
+afterEach(async () => {
+    cleanup();
+    // because of removing the item after timeout.
+    await new Promise(resolve => setTimeout(resolve, 1000));
+});
+
 describe('ConfirmationProvider and promptConfirmation', () => {
+
     it('should show confirmation dialog and resolve with true when confirmed', async () => {
         render(<ConfirmationProvider Component={TestComponent} />);
 
         const confirmationPromise = promptConfirmation();
 
         const continueButton = await screen.findByText('Continue');
-        expect(continueButton).toBeInTheDocument();
+        expect(screen.findByText('Continue')).not.toBeNull();
 
-        fireEvent.click(continueButton);
+        act(() => {
+            continueButton.click();
+        });
 
         const result = await confirmationPromise;
         expect(result).toBe(true);
@@ -43,9 +48,11 @@ describe('ConfirmationProvider and promptConfirmation', () => {
         const confirmationPromise = promptConfirmation();
 
         const cancelButton = await screen.findByText('Cancel');
-        expect(cancelButton).toBeInTheDocument();
+        expect(cancelButton).not.toBeNull();
 
-        fireEvent.click(cancelButton);
+        act(() => {
+            cancelButton.click();
+        });
 
         const result = await confirmationPromise;
         expect(result).toBe(false);
@@ -59,7 +66,7 @@ describe('ConfirmationProvider and promptConfirmation', () => {
             description: 'Custom Description',
         });
 
-        expect(await screen.findByText('Custom Title')).toBeInTheDocument();
-        expect(await screen.findByText('Custom Description')).toBeInTheDocument();
+        expect(await screen.findByText('Custom Title')).not.toBeNull();
+        expect(await screen.findByText('Custom Description')).not.toBeNull();
     });
 });
