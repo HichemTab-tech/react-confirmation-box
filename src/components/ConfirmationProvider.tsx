@@ -10,12 +10,12 @@ export type ConfirmationProps = Omit<
     "onOpenChange"
 >
 
-type ConfirmationHolder = {
+type ConfirmationRequest = {
     props?: ConfirmationProps
     resolve?: (value: boolean) => void
 };
 
-const confirmationRegistry = new Map<string, ConfirmationHolder>();
+const confirmationRegistry = new Map<string, ConfirmationRequest>();
 let confirmationRegistryIds: string[] = [];
 const listeners: (() => void)[] = [];
 const subscribe = (callback: () => void) => {
@@ -52,27 +52,27 @@ export const promptConfirmation = (props?: ConfirmationProps) => {
     });
 }
 
-export type ConfirmerProps = Pick<ConfirmationDialogWrapperProps, 'Component'>;
+export type ConfirmationProviderProps = Pick<ConfirmationDialogWrapperProps, 'Component'>;
 
-let confirmerInstancesNumber = 0;
+let confirmationProviderInstancesNumber = 0;
 
-const Confirmer = ({Component}: ConfirmerProps) => {
+const ConfirmationProvider = ({Component}: ConfirmationProviderProps) => {
     const ids = useSyncExternalStore(subscribe, getConfirmationsFromRegistry, getConfirmationsFromRegistry);
 
     useEffect(() => {
-        confirmerInstancesNumber++;
-        if (confirmerInstancesNumber > 1) {
-            console.error("You can't have more than one Confirmer component on the page. You will have unexpected behavior. Please remove one of them.");
+        confirmationProviderInstancesNumber++;
+        if (confirmationProviderInstancesNumber > 1) {
+            console.error("You can't have more than one ConfirmationProvider component on the page. You will have unexpected behavior. Please remove one of them.");
         }
         return () => {
-            confirmerInstancesNumber--;
+            confirmationProviderInstancesNumber--;
         }
     }, []);
 
     return (
         <>
             {ids.map(id => (
-                <ConfirmationHolder
+                <ConfirmationDialog
                     id={id}
                     key={id}
                     Component={Component}
@@ -82,7 +82,7 @@ const Confirmer = ({Component}: ConfirmerProps) => {
     )
 }
 
-const ConfirmationHolder = ({id, Component}: {id: string} & Pick<ConfirmationDialogWrapperProps, 'Component'>) => {
+const ConfirmationDialog = ({id, Component}: {id: string} & Pick<ConfirmationDialogWrapperProps, 'Component'>) => {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -99,8 +99,8 @@ const ConfirmationHolder = ({id, Component}: {id: string} & Pick<ConfirmationDia
         setOpen(false);
         setTimeout(() => {
             removeConfirmationId(id);
-        }, 2000);
-    }, []);
+        }, 800);
+    }, [setOpen]);
 
     const {onConfirm, onCancel, ...props} = confirmationRegistry.get(id)?.props??{};
 
@@ -116,4 +116,4 @@ const ConfirmationHolder = ({id, Component}: {id: string} & Pick<ConfirmationDia
     );
 }
 
-export default Confirmer;
+export default ConfirmationProvider;

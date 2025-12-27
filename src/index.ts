@@ -5,8 +5,8 @@ export type {
 
 // noinspection JSUnusedGlobalSymbols
 export {
-    default as Confirmer,
+    default as ConfirmationProvider,
     type ConfirmationProps,
-    type ConfirmerProps,
+    type ConfirmationProviderProps,
     promptConfirmation
 } from './components/Confirmer';
