@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Confirmer, promptConfirmation} from 'react-confirmation-box';
+import {ConfirmationProvider, promptConfirmation} from 'react-confirmation-box';
 import {Button} from "../src/components/ui/button";
 
 const App = () => {
@@ -52,7 +52,7 @@ const App = () => {
             <Button onClick={() => handle2()}>Click to do something 2</Button>
             <br/>
             <Button onClick={() => handle3()}>Click to do something nested</Button>
-            <Confirmer/>
+            <ConfirmationProvider/>
         </div>
     );
 };
