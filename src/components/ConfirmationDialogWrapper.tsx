@@ -40,7 +40,7 @@ export interface ConfirmationDialogProps {
 function DefaultConfirmationDialog(props: ConfirmationDialogProps) {
     return (
         <AlertDialog open={props.open} onOpenChange={props.onOpenChange}>
-            <AlertDialogContent className="rcb:sm:max-w-md">
+            <AlertDialogContent className="rcb:sm:max-w-md rcb:bg-white">
                 <AlertDialogHeader>
                     <div className="rcb:flex rcb:items-center rcb:gap-3">
                         {props.warning ? (
