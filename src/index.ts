@@ -9,4 +9,4 @@ export {
     type ConfirmationProps,
     type ConfirmationProviderProps,
     promptConfirmation
-} from './components/Confirmer';
+} from './components/ConfirmationProvider';
