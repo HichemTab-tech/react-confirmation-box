@@ -5,6 +5,7 @@ import { resolve } from 'path';
 import dts from 'vite-plugin-dts';
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 import tailwindcss from '@tailwindcss/vite';
+import path from 'path';
 
 
 const version = require('./package.json').version;
@@ -35,6 +36,11 @@ export default defineConfig({
             }
         }
     },
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, 'src')
+        }
+    },
     plugins: [
         tailwindcss(),
         react(),
@@ -46,6 +52,5 @@ export default defineConfig({
             insertTypesEntry: true, // Adds the `types` field in package.json
             exclude: ['node_modules', 'dist'], // Exclude unnecessary files
         })
-
     ]
 });

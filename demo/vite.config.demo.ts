@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { resolve } from 'path';
 
+// noinspection JSUnusedGlobalSymbols
 export default defineConfig({
     root: 'demo', // Set the root directory to the demo folder
     build: {
@@ -12,6 +13,7 @@ export default defineConfig({
         alias: {
             // Allow your demo to resolve your library directly
             'react-confirmation-box': resolve(__dirname, '../src'),
+            '@': resolve(__dirname, '../src')
         },
     },
     server: {

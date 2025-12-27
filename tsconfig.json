@@ -36,6 +36,10 @@
     "declarationDir": "dist", // Output directory for types
     "outDir": "dist", // Output directory for compiled files
     "emitDeclarationOnly": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
