@@ -3,7 +3,6 @@ import banner from 'vite-plugin-banner';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import dts from 'vite-plugin-dts';
-import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 
@@ -37,7 +36,8 @@ export default defineConfig({
                     'react-dom': 'ReactDOM',
                     'react/jsx-runtime': 'jsxRuntime'
                 },
-            }
+                assetFileNames: 'index.css',
+            },
         }
     },
     resolve: {
@@ -49,7 +49,6 @@ export default defineConfig({
         tailwindcss(),
         react(),
         banner(bannerContent),
-        cssInjectedByJsPlugin(),
         dts({
             entryRoot: 'src', // Base folder for type generation
             outDir: 'dist', // Ensures types go into `dist/`

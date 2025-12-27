@@ -30,6 +30,7 @@ Mount the provider once (usually at the root of your app):
 
 ```tsx
 import { ConfirmationProvider } from "react-confirmation-box";
+import "react-confirmation-box/style.css"; // you don't need to import the css if you provide you're own component, check #custom-dialog-component
 
 export function App() {
   return (
