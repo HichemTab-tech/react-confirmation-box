@@ -40,32 +40,32 @@ export interface ConfirmationDialogProps {
 function DefaultConfirmationDialog(props: ConfirmationDialogProps) {
     return (
         <AlertDialog open={props.open} onOpenChange={props.onOpenChange}>
-            <AlertDialogContent className="sm:max-w-md">
+            <AlertDialogContent className="rcb:sm:max-w-md">
                 <AlertDialogHeader>
-                    <div className="flex items-center gap-3">
+                    <div className="rcb:flex rcb:items-center rcb:gap-3">
                         {props.warning ? (
                             <div
-                                className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
-                                <AlertTriangle className="h-5 w-5 text-destructive"/>
+                                className="rcb:flex rcb:h-10 rcb:w-10 rcb:items-center rcb:justify-center rcb:rounded-full rcb:bg-destructive/10">
+                                <AlertTriangle className="rcb:h-5 rcb:w-5 rcb:text-destructive"/>
                             </div>
                         ) : (
                             <div
-                                className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                                <Info className="h-5 w-5 text-primary"/>
+                                className="rcb:flex rcb:h-10 rcb:w-10 rcb:items-center rcb:justify-center rcb:rounded-full rcb:bg-primary/10">
+                                <Info className="rcb:h-5 rcb:w-5 rcb:text-primary"/>
                             </div>
                         )}
-                        <AlertDialogTitle className="text-left">{props.title}</AlertDialogTitle>
+                        <AlertDialogTitle className="rcb:text-left">{props.title}</AlertDialogTitle>
                     </div>
                     <AlertDialogDescription
-                        className="text-left">{props.description}</AlertDialogDescription>
+                        className="rcb:text-left">{props.description}</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter
-                    className="flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+                    className="rcb:flex-col-reverse rcb:sm:flex-row rcb:sm:justify-end rcb:sm:space-x-2">
                     <AlertDialogCancel
                         onClick={props.onCancel}>{props.cancelText}</AlertDialogCancel>
                     <AlertDialogAction
                         onClick={props.onConfirm}
-                        className={cn(props.warning && "bg-destructive text-destructive-foreground hover:bg-destructive/90")}
+                        className={cn(props.warning && "rcb:bg-destructive rcb:text-destructive-foreground rcb:hover:bg-destructive/90")}
                     >
                         {props.confirmText}
                     </AlertDialogAction>

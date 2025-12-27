@@ -5,24 +5,24 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-    "cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+    "rcb:cursor-pointer rcb:inline-flex rcb:items-center rcb:justify-center rcb:gap-2 rcb:whitespace-nowrap rcb:rounded-md rcb:text-sm rcb:font-medium rcb:transition-[color,box-shadow] rcb:disabled:pointer-events-none rcb:disabled:opacity-50 rcb:[&_svg]:pointer-events-none rcb:[&_svg:not([class*='size-'])]:size-4 rcb:[&_svg]:shrink-0 rcb:outline-none rcb:focus-visible:border-ring rcb:focus-visible:ring-ring/50 rcb:focus-visible:ring-[3px] rcb:aria-invalid:ring-destructive/20 rcb:dark:aria-invalid:ring-destructive/40 rcb:aria-invalid:border-destructive",
     {
         variants: {
             variant: {
-                default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+                default: 'rcb:bg-primary rcb:text-primary-foreground rcb:shadow-xs rcb:hover:bg-primary/90',
                 destructive:
-                    'bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40',
-                outline: 'border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground',
-                secondary: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
-                ghost: 'hover:bg-accent hover:text-accent-foreground',
-                link: 'text-primary underline-offset-4 hover:underline',
+                    'rcb:bg-destructive rcb:text-white rcb:shadow-xs rcb:hover:bg-destructive/90 rcb:focus-visible:ring-destructive/20 rcb:dark:focus-visible:ring-destructive/40',
+                outline: 'rcb:border rcb:border-input rcb:bg-background rcb:shadow-xs rcb:hover:bg-accent rcb:hover:text-accent-foreground',
+                secondary: 'rcb:bg-secondary rcb:text-secondary-foreground rcb:shadow-xs rcb:hover:bg-secondary/80',
+                ghost: 'rcb:hover:bg-accent rcb:hover:text-accent-foreground',
+                link: 'rcb:text-primary rcb:underline-offset-4 rcb:hover:underline',
                 root: '',
             },
             size: {
-                default: 'h-9 px-4 py-2 has-[>svg]:px-3',
-                sm: 'h-8 rounded-md px-3 has-[>svg]:px-2.5',
-                lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
-                icon: 'size-9',
+                default: 'rcb:h-9 rcb:px-4 rcb:py-2 rcb:has-[>svg]:px-3',
+                sm: 'rcb:h-8 rcb:rounded-md rcb:px-3 rcb:has-[>svg]:px-2.5',
+                lg: 'rcb:h-10 rcb:rounded-md rcb:px-6 rcb:has-[>svg]:px-4',
+                icon: 'rcb:size-9',
             },
         },
         defaultVariants: {
