@@ -40,6 +40,7 @@ const getConfirmationsFromRegistry = () => {
 }
 const removeConfirmationId = (id: string) => {
     confirmationRegistryIds = confirmationRegistryIds.filter(existingId => existingId !== id);
+    confirmationRegistry.delete(id);
     notifyListeners();
 }
 
@@ -89,10 +90,6 @@ const ConfirmationDialog = ({id, Component}: {id: string} & Pick<ConfirmationDia
 
     useEffect(() => {
         setOpen(true);
-
-        return () => {
-            confirmationRegistry.delete(id);
-        }
     }, [setOpen]);
 
     const handle = useCallback((ok: boolean, then?: () => void) => {
