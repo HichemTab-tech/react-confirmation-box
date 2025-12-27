@@ -1,6 +1,6 @@
 {
   "name": "react-confirmation-box",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "A lightweight React utility that exposes an async confirmation dialog, allowing you to await user confirmation before proceeding",
   "keywords": [
