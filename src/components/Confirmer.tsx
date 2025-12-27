@@ -60,8 +60,6 @@ let confirmerInstancesNumber = 0;
 const Confirmer = ({Component}: ConfirmerProps) => {
     const ids = useSyncExternalStore(subscribe, getConfirmationsFromRegistry, getConfirmationsFromRegistry);
 
-    console.log("ids", ids);
-
     useEffect(() => {
         confirmerInstancesNumber++;
         if (confirmerInstancesNumber > 1) {
