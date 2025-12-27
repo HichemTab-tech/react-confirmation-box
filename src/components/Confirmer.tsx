@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useState, useSyncExternalStore} from "react";
 import ConfirmationDialogWrapper, {
-    type ConfirmationDialogProps,
     type ConfirmationDialogWrapperProps
 } from "./ConfirmationDialogWrapper";
 
