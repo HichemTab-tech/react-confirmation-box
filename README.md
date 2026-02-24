@@ -26,7 +26,7 @@ pnpm add react-confirmation-box
 
 ## ☕ 60-Second TL;DR
 
-Mount the provider once (usually at the root of your app):
+Mount the provider once per confirmation scope (usually at the root of your app):
 
 ```tsx
 import { ConfirmationProvider } from "react-confirmation-box";
@@ -41,6 +41,8 @@ export function App() {
   );
 }
 ```
+
+Need more than one isolated confirmation zone (micro-frontends, portals, modals living outside the root tree, etc.)? Give each provider a unique `name` and pass that same name to `promptConfirmation`. If you would rather not wire names manually, the new `createConfirmation` helper (documented below) can spin up a scoped provider/prompt pair for you.
 
 Use it anywhere:
 
@@ -92,6 +94,55 @@ promptConfirmation().then((confirmed) => {
 });
 ```
 
+### Targeting a specific provider instance
+
+If you render more than one provider, pass the `name` prop to keep each confirmation stream isolated. Use the same `name` when calling `promptConfirmation`.
+
+```tsx
+<ConfirmationProvider name="admin" />
+<ConfirmationProvider name="customer" />
+
+async function deleteAsAdmin() {
+  const confirmed = await promptConfirmation({ title: "Delete admin record" }, "admin");
+  if (confirmed) {
+    // ...
+  }
+}
+```
+
+### Using `createConfirmation` for scoped flows
+
+`createConfirmation` bundles a unique provider and a matching `promptConfirmation` function. This is handy for components that should manage their own confirmation scope without worrying about global names.
+
+```tsx
+import { createConfirmation } from "react-confirmation-box";
+import { CustomDialog } from "./CustomDialog";
+
+const {
+  ConfirmationProvider: CommentConfirmationProvider,
+  promptConfirmation: promptCommentConfirmation,
+} = createConfirmation(
+  { title: "Delete comment" },
+  CustomDialog
+);
+
+function CommentsModule() {
+  return (
+    <>
+      {/* module code */}
+      <CommentConfirmationProvider />
+    </>
+  );
+}
+
+async function deleteComment() {
+  const confirmed = await promptCommentConfirmation();
+  if (confirmed) {
+    // delete comment
+  }
+}
+```
+
 ### Nested confirmations
 
 Confirmations can be chained or nested naturally:
@@ -123,15 +174,16 @@ Your component will receive all required props (`open`, `onConfirm`, `onCancel`,
 
 ## API Reference
 
-### `promptConfirmation(options?)`
+### `promptConfirmation(options?, name?)`
 
 Triggers a confirmation dialog and returns a promise that resolves with the user’s choice.
 
 **Parameters**
 
-| Name      | Type                | Description                   |
-|-----------|---------------------|-------------------------------|
-| `options` | `ConfirmationProps` | Optional dialog configuration |
+| Name      | Type                | Description                                                             |
+|-----------|---------------------|-------------------------------------------------------------------------|
+| `options` | `ConfirmationProps` | Optional dialog configuration                                           |
+| `name`    | `string`            | The confirmation scope to target. Defaults to `"default"` when omitted. |
 
 **Returns**
 
@@ -160,9 +212,39 @@ Responsible for rendering confirmation dialogs.
 
 **Props**
 
-| Name        | Type                                             | Description                          |
-|-------------|--------------------------------------------------|--------------------------------------|
-| `Component` | `React.FC<ConfirmationDialogProps>` *(optional)* | Custom confirmation dialog component |
+| Name        | Type                                             | Description                                                                  |
+|-------------|--------------------------------------------------|------------------------------------------------------------------------------|
+| `Component` | `React.FC<ConfirmationDialogProps>` *(optional)* | Custom confirmation dialog component                                         |
+| `name`      | `string`                                         | Scope identifier. Use unique names when you need multiple providers at once. |
+### `createConfirmation(baseOptions?, Component?)`
+
+Creates a scoped confirmation helper consisting of a dedicated provider component and a `promptConfirmation` function that automatically targets that provider’s internal `name`.
+
+**Parameters**
+
+| Name           | Type                                             | Description                                                         |
+|----------------|--------------------------------------------------|---------------------------------------------------------------------|
+| `baseOptions`  | `ConfirmationProps`                              | Defaults that apply to every confirmation created by the helper.    |
+| `Component`    | `React.FC<ConfirmationDialogProps>` *(optional)* | Custom dialog component to render for that scoped provider.         |
+
+**Returns**
+
+- `ConfirmationProvider`: mount this inside the scope that needs confirmations.
+- `promptConfirmation`: call this to show a dialog wired to that provider.
+
+**Example**
+
+```ts
+const { ConfirmationProvider, promptConfirmation } = createConfirmation();
+
+function Feature() {
+  return (
+    <ConfirmationProvider>
+      {/* feature tree */}
+    </ConfirmationProvider>
+  );
+}
+```
 
 **ConfirmationDialogProps**
 ```typescript

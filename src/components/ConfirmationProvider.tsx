@@ -16,7 +16,7 @@ type ConfirmationRequest = {
 };
 
 const confirmationRegistry = new Map<string, Map<string, ConfirmationRequest>>();
-let confirmationRegistryIds: string[] = [];
+let confirmationRegistryIds: Array<{id: string, name: string}> = [];
 const listeners: (() => void)[] = [];
 const subscribe = (callback: () => void) => {
     listeners.push(callback);
@@ -33,17 +33,20 @@ const register = (id: string, props: ConfirmationProps|undefined, name: string) 
         confirmationRegistry.set(name, new Map());
     }
     confirmationRegistry.get(name)!.set(id, {props});
-    if (!confirmationRegistryIds.includes(id)) {
-        confirmationRegistryIds = [...confirmationRegistryIds, id];
+    if (!confirmationRegistryIds.some(entry => entry.id === id)) {
+        confirmationRegistryIds = [...confirmationRegistryIds, {id, name}];
         notifyListeners();
     }
 }
 const getConfirmationsFromRegistry = () => {
     return confirmationRegistryIds;
 }
-const removeConfirmationId = (id: string) => {
-    confirmationRegistryIds = confirmationRegistryIds.filter(existingId => existingId !== id);
-    confirmationRegistry.delete(id);
+const removeConfirmationId = (id: string, name: string) => {
+    confirmationRegistryIds = confirmationRegistryIds.filter(entry => entry.id !== id);
+    confirmationRegistry.get(name)?.delete(id);
+    if (confirmationRegistry.get(name)?.size === 0) {
+        confirmationRegistry.delete(name);
+    }
     notifyListeners();
 }
 
@@ -84,7 +87,7 @@ const ConfirmationProvider = memo(({Component, name}: ConfirmationProviderProps)
 
     return (
         <>
-            {ids.map(id => (
+            {ids.filter(entry => entry.name === name).map(({id}) => (
                 <ConfirmationDialog
                     id={id}
                     key={id}
@@ -108,9 +111,9 @@ const ConfirmationDialog = memo(({id, Component, name}: {id: string, name: strin
         then?.();
         setOpen(false);
         setTimeout(() => {
-            removeConfirmationId(id);
+            removeConfirmationId(id, name);
         }, 800);
-    }, [setOpen]);
+    }, [setOpen, name, id]);
 
     const {onConfirm, onCancel, ...props} = confirmationRegistry.get(name)?.get(id)?.props??{};
 

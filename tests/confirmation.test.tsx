@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, act, cleanup } from '@testing-library/react';
-import { ConfirmationProvider, promptConfirmation, type ConfirmationDialogProps } from '../src';
+import { ConfirmationProvider, promptConfirmation, type ConfirmationDialogProps, createConfirmation } from '../src';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../src/components/ui/alert-dialog';
 
 const TestComponent = ({ title, description, onConfirm, onCancel, open, onOpenChange }: ConfirmationDialogProps) => (
@@ -68,5 +68,42 @@ describe('ConfirmationProvider and promptConfirmation', () => {
 
         expect(await screen.findByText('Custom Title')).not.toBeNull();
         expect(await screen.findByText('Custom Description')).not.toBeNull();
+    });
+
+    it('should resolve confirmations scoped to a named provider', async () => {
+        render(<ConfirmationProvider Component={TestComponent} name="secondary" />);
+
+        const confirmationPromise = promptConfirmation({ title: 'Secondary flow' }, 'secondary');
+
+        expect(await screen.findByText('Secondary flow')).not.toBeNull();
+        const continueButton = await screen.findByText('Continue');
+
+        act(() => {
+            continueButton.click();
+        });
+
+        const result = await confirmationPromise;
+        expect(result).toBe(true);
+    });
+
+    it('should allow createConfirmation to produce scoped helpers', async () => {
+        const {
+            ConfirmationProvider: ScopedProvider,
+            promptConfirmation: scopedPrompt,
+        } = createConfirmation(undefined, TestComponent);
+
+        render(<ScopedProvider />);
+
+        const confirmationPromise = scopedPrompt({ title: 'Scoped helper' });
+
+        expect(await screen.findByText('Scoped helper')).not.toBeNull();
+        const continueButton = await screen.findByText('Continue');
+
+        act(() => {
+            continueButton.click();
+        });
+
+        const result = await confirmationPromise;
+        expect(result).toBe(true);
     });
 });
