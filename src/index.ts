@@ -8,5 +8,6 @@ export {
     default as ConfirmationProvider,
     type ConfirmationProps,
     type ConfirmationProviderProps,
-    promptConfirmation
+    promptConfirmation,
+    createConfirmation
 } from './components/ConfirmationProvider';

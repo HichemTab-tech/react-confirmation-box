@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState, useSyncExternalStore} from "react";
+import React, {memo, useCallback, useEffect, useState, useSyncExternalStore} from "react";
 import ConfirmationDialogWrapper, {
     type ConfirmationDialogWrapperProps
 } from "./ConfirmationDialogWrapper";
@@ -15,7 +15,7 @@ type ConfirmationRequest = {
     resolve?: (value: boolean) => void
 };
 
-const confirmationRegistry = new Map<string, ConfirmationRequest>();
+const confirmationRegistry = new Map<string, Map<string, ConfirmationRequest>>();
 let confirmationRegistryIds: string[] = [];
 const listeners: (() => void)[] = [];
 const subscribe = (callback: () => void) => {
@@ -28,8 +28,11 @@ const unsubscribe = (callback: () => void) => {
 const notifyListeners = () => {
     listeners.forEach(callback => callback());
 }
-const register = (id: string, props?: ConfirmationProps) => {
-    confirmationRegistry.set(id, {props});
+const register = (id: string, props: ConfirmationProps|undefined, name: string) => {
+    if (!confirmationRegistry.has(name)) {
+        confirmationRegistry.set(name, new Map());
+    }
+    confirmationRegistry.get(name)!.set(id, {props});
     if (!confirmationRegistryIds.includes(id)) {
         confirmationRegistryIds = [...confirmationRegistryIds, id];
         notifyListeners();
@@ -44,31 +47,38 @@ const removeConfirmationId = (id: string) => {
     notifyListeners();
 }
 
-export type ConfirmationProviderProps = Pick<ConfirmationDialogWrapperProps, 'Component'>;
+export type ConfirmationProviderProps = Pick<ConfirmationDialogWrapperProps, 'Component'> & {name?: string};
 
-let confirmationProviderInstancesNumber = 0;
+let confirmationProviderInstancesNumber = new Map<string, number>();
 
-export const promptConfirmation = (props?: ConfirmationProps) => {
-    if (confirmationProviderInstancesNumber === 0) {
+export const promptConfirmation = (props?: ConfirmationProps, name: string = "default") => {
+    if ((confirmationProviderInstancesNumber.get(name)??0) === 0) {
         throw new Error("No ConfirmationProvider component found on the page. You can't use promptConfirmation if your app doesn't have ConfirmationProvider component. Please add one to your page, check https://github.com/HichemTab-tech/react-confirmation-box#-60-second-tldr for more information.");
     }
     const uniqueId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    register(uniqueId, props);
+    register(uniqueId, props, name);
     return new Promise<boolean>((resolve) => {
-        confirmationRegistry.get(uniqueId)!.resolve = resolve;
+        confirmationRegistry.get(name)!.get(uniqueId)!.resolve = resolve;
     });
 }
 
-const ConfirmationProvider = ({Component}: ConfirmationProviderProps) => {
+const ConfirmationProvider = memo(({Component, name}: ConfirmationProviderProps) => {
     const ids = useSyncExternalStore(subscribe, getConfirmationsFromRegistry, getConfirmationsFromRegistry);
+    name ??= "default";
 
     useEffect(() => {
-        confirmationProviderInstancesNumber++;
-        if (confirmationProviderInstancesNumber > 1) {
+        if (!confirmationProviderInstancesNumber.has(name)) {
+            confirmationProviderInstancesNumber.set(name, 0);
+        }
+        confirmationProviderInstancesNumber.set(name, confirmationProviderInstancesNumber.get(name)! + 1);
+        if (confirmationProviderInstancesNumber.get(name)! > 1) {
             console.error("You can't have more than one ConfirmationProvider component on the page. You will have unexpected behavior. Please remove one of them.");
         }
         return () => {
-            confirmationProviderInstancesNumber--;
+            confirmationProviderInstancesNumber.set(name, confirmationProviderInstancesNumber.get(name)! - 1);
+            if (confirmationProviderInstancesNumber.get(name)! === 0) {
+                confirmationProviderInstancesNumber.delete(name);
+            }
         }
     }, []);
 
@@ -79,13 +89,14 @@ const ConfirmationProvider = ({Component}: ConfirmationProviderProps) => {
                     id={id}
                     key={id}
                     Component={Component}
+                    name={name}
                 />
             ))}
         </>
     )
-}
+});
 
-const ConfirmationDialog = ({id, Component}: {id: string} & Pick<ConfirmationDialogWrapperProps, 'Component'>) => {
+const ConfirmationDialog = memo(({id, Component, name}: {id: string, name: string} & Pick<ConfirmationDialogWrapperProps, 'Component'>) => {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -93,7 +104,7 @@ const ConfirmationDialog = ({id, Component}: {id: string} & Pick<ConfirmationDia
     }, [setOpen]);
 
     const handle = useCallback((ok: boolean, then?: () => void) => {
-        confirmationRegistry.get(id)?.resolve?.(ok);
+        confirmationRegistry.get(name)?.get(id)?.resolve?.(ok);
         then?.();
         setOpen(false);
         setTimeout(() => {
@@ -101,7 +112,7 @@ const ConfirmationDialog = ({id, Component}: {id: string} & Pick<ConfirmationDia
         }, 800);
     }, [setOpen]);
 
-    const {onConfirm, onCancel, ...props} = confirmationRegistry.get(id)?.props??{};
+    const {onConfirm, onCancel, ...props} = confirmationRegistry.get(name)?.get(id)?.props??{};
 
     return (
         <ConfirmationDialogWrapper
@@ -113,6 +124,20 @@ const ConfirmationDialog = ({id, Component}: {id: string} & Pick<ConfirmationDia
             onCancel={() => handle(false, onCancel)}
         />
     );
+});
+
+export const createConfirmation = (props?: ConfirmationProps, Component?: NonNullable<ConfirmationProviderProps['Component']>) => {
+    const name = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    // noinspection JSUnusedGlobalSymbols
+    return {
+        promptConfirmation: (overrideProps?: ConfirmationProps) => promptConfirmation({
+            ...props,
+            ...overrideProps
+        }, name),
+        ConfirmationProvider: () => {
+            return <ConfirmationProvider Component={Component} name={name}/>;
+        }
+    };
 }
 
 export default ConfirmationProvider;
