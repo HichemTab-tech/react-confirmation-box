@@ -129,7 +129,10 @@ const ConfirmationDialog = memo(({id, Component, name}: {id: string, name: strin
     );
 });
 
-export const createConfirmation = (props?: ConfirmationProps, Component?: NonNullable<ConfirmationProviderProps['Component']>) => {
+export const createConfirmation = (props?: ConfirmationProps, Component?: NonNullable<ConfirmationProviderProps['Component']>): {
+    promptConfirmation: (overrideProps?: ConfirmationProps) => Promise<boolean>,
+    ConfirmationProvider: React.FC
+} => {
     const name = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     // noinspection JSUnusedGlobalSymbols
     return {
